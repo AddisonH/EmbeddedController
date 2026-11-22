@@ -317,6 +317,10 @@ void espi_trace_state(const char *why);
 void system_hang_detect(void)
 {
 	espi_trace_state("hang detect");
+	CPRINTS("espi_rst_l=%d slp_s3_l=%d slp_s5_l=%d",
+		gpio_pin_get_dt(GPIO_DT_FROM_NODELABEL(gpio_ec_espi_rst_l)),
+		gpio_pin_get_dt(GPIO_DT_FROM_NODELABEL(gpio_slp_s3_l)),
+		gpio_pin_get_dt(GPIO_DT_FROM_NODELABEL(gpio_slp_s5_l)));
 
 	/* The AP was shut down before the check ran. */
 	if (chipset_in_state(CHIPSET_STATE_ANY_OFF))
