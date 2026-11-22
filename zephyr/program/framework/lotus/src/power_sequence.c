@@ -465,12 +465,8 @@ enum power_state power_handle_state(enum power_state state)
 	case POWER_S5S3:
 
 		/* Call hooks now that rails are up */
-<<<<<<< HEAD
 		CPRINTS("hang detect armed");
-		hook_call_deferred(&system_hang_detect_data, 3 * SECOND);
-=======
 		hook_call_deferred(&system_hang_detect_data, SECOND);
->>>>>>> hang-detect-fix
 
 		/* enable the psys to resume from low power mode */
 #ifdef CONFIG_BOARD_LOTUS
@@ -549,7 +545,8 @@ enum power_state power_handle_state(enum power_state state)
 			return POWER_S3;
 		}
 
-		k_msleep(10);
+		/* DEBUG experiment: was 10 ms */
+		k_msleep(110);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_sys_pwrgd_ec), 1);
 
 		lpc_s0ix_resume_restore_masks();
