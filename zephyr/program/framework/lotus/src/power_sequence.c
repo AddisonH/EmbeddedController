@@ -264,7 +264,7 @@ void chipset_reset(enum chipset_shutdown_reason reason)
 }
 
 /* DEBUG: minimum time the rails stay off before the next power-on. */
-#define DEBUG_MIN_OFF_TIME_MS 3000
+#define DEBUG_MIN_OFF_TIME_MS 0
 static timestamp_t rails_off_time;
 
 static void chipset_force_g3(void)
