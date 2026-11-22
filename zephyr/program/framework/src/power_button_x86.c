@@ -228,7 +228,12 @@ static void set_initial_pwrbtn_state(void)
 {
 	uint32_t reset_flags = system_get_reset_flags();
 
-	if (reset_flags == EC_RESET_FLAG_HARD) {
+	if (IS_ENABLED(CONFIG_POWER_ON_AFTER_SYSJUMP) &&
+	    system_jumped_to_this_image()) {
+		/* power_chipset_init() forced the AP to G3 on the jump. */
+		pwrbtn_state = PWRBTN_STATE_INIT_ON;
+		CPRINTS("PB init-on after sysjump");
+	} else if (reset_flags == EC_RESET_FLAG_HARD) {
 		pwrbtn_state = PWRBTN_STATE_INIT_ON;
 		CPRINTS("PB init-on after updating firmware");
 #ifndef CONFIG_PLATFORM_EC_FRAMEWORK_MINI_PC

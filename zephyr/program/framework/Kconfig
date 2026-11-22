@@ -231,6 +231,12 @@ config PD_ERROR_RECOVERY
 		to send the error recovery command to PD during powering up the
 		system.
 
+config POWER_ON_AFTER_SYSJUMP
+	bool "power the AP back on after a jump between RO and RW"
+	help
+		A jump between images forces the AP to G3. Enable this to power
+		it back on once the new image is running.
+
 # Driver configuration
 config PLATFORM_EC_WAKE_ON_LAN
 	bool "system can be waked on lan"
