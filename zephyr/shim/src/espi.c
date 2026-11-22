@@ -799,6 +799,25 @@ void clear_espi_virtual_wire_channel_status(void)
 }
 DECLARE_HOOK(HOOK_CHIPSET_SHUTDOWN, clear_espi_virtual_wire_channel_status, HOOK_PRIO_DEFAULT);
 
+static void espi_vw_ready_log(void)
+{
+	cprints(CC_CHIPSET, "eSPI VW ready");
+}
+DECLARE_DEFERRED(espi_vw_ready_log);
+
+void espi_trace_state(const char *why)
+{
+	uint8_t pltrst = 0xff, slp_s3 = 0xff;
+
+	espi_receive_vwire(espi_dev, ESPI_VWIRE_SIGNAL_PLTRST, &pltrst);
+	espi_receive_vwire(espi_dev, ESPI_VWIRE_SIGNAL_SLP_S3, &slp_s3);
+	cprints(CC_CHIPSET, "eSPI %s: flag=%d vw_ch=%d periph_ch=%d pltrst=%d slp_s3=%d",
+		why, espi_channel_vr_ready,
+		espi_get_channel_status(espi_dev, ESPI_CHANNEL_VWIRE),
+		espi_get_channel_status(espi_dev, ESPI_CHANNEL_PERIPHERAL),
+		pltrst, slp_s3);
+}
+
 static void custom_espi_channel_ready_handler(const struct device *dev,
 				    struct espi_callback *cb,
 				    struct espi_event event)
@@ -807,7 +826,7 @@ static void custom_espi_channel_ready_handler(const struct device *dev,
 		switch (event.evt_details) {
 		case ESPI_CHANNEL_VWIRE:
 			espi_channel_vr_ready = 1;
-			cprints(CC_CHIPSET, "eSPI VW ready");
+			hook_call_deferred(&espi_vw_ready_log_data, 0);
 			break;
 		default:
 		}
