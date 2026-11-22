@@ -671,8 +671,13 @@ system_run_image_copy_with_flags(enum ec_image copy, uint32_t add_reset_flags)
 	uintptr_t base;
 	uintptr_t init_addr;
 
-	/* If system is already running the requested image, done */
-	if (system_get_image_copy() == copy)
+	/*
+	 * If system is already running the requested image, done. With
+	 * CONFIG_SYSJUMP_RELOAD_RW a jump from RW to RW loads it from flash
+	 * again, to start a newly written image without going through RO.
+	 */
+	if (system_get_image_copy() == copy &&
+	    !(IS_ENABLED(CONFIG_SYSJUMP_RELOAD_RW) && is_rw_image(copy)))
 		return EC_SUCCESS;
 
 	if (system_is_locked()) {
