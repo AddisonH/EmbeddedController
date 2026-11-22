@@ -443,7 +443,7 @@ enum power_state power_handle_state(enum power_state state)
 	case POWER_S5S3:
 
 		/* Call hooks now that rails are up */
-		hook_call_deferred(&system_hang_detect_data, 3 * SECOND);
+		hook_call_deferred(&system_hang_detect_data, SECOND);
 
 		/* enable the psys to resume from low power mode */
 #ifdef CONFIG_BOARD_LOTUS
