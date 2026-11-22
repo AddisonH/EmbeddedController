@@ -263,8 +263,13 @@ void chipset_reset(enum chipset_shutdown_reason reason)
 	/* unused function, EC doesn't control GPIO_SYS_RESET_L */
 }
 
+/* DEBUG: minimum time the rails stay off before the next power-on. */
+#define DEBUG_MIN_OFF_TIME_MS 3000
+static timestamp_t rails_off_time;
+
 static void chipset_force_g3(void)
 {
+	rails_off_time = get_time();
 	input_modules_powerdown();
 	gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_sleep_l), 0);
 	gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_hub_b_pwr_en), 0);
@@ -308,34 +313,20 @@ enum power_state power_chipset_init(void)
  * If EC detect the system hangs, force reset the system then reboot again.
  */
 #define VW_NO_READY 0
-#define HANG_DETECT_DELAY (5 * SECOND)
-#define HANG_DETECT_MAX_RETRIES 4
 void espi_trace_state(const char *why);
 void system_hang_detect(void)
 {
-	static int retry_count;
-
 	espi_trace_state("hang detect");
 
 	/* The AP was shut down before the check ran. */
 	if (chipset_in_state(CHIPSET_STATE_ANY_OFF))
 		return;
 
-	if (get_espi_virtual_wire_channel_status() != VW_NO_READY) {
-		retry_count = 0;
-		return;
+	if (get_espi_virtual_wire_channel_status() == VW_NO_READY) {
+		CPRINTS("eSPI VW not ready, rebooting AP");
+		board_reboot_ap_on_g3();
+		chipset_force_shutdown(CHIPSET_RESET_HANG_REBOOT);
 	}
-
-	if (retry_count >= HANG_DETECT_MAX_RETRIES) {
-		CPRINTS("eSPI VW not ready, giving up after %d reboots",
-			retry_count);
-		return;
-	}
-
-	CPRINTS("eSPI VW not ready, rebooting AP (%d/%d)", ++retry_count,
-		HANG_DETECT_MAX_RETRIES);
-	board_reboot_ap_on_g3();
-	chipset_force_shutdown(CHIPSET_RESET_HANG_REBOOT);
 }
 DECLARE_DEFERRED(system_hang_detect);
 
@@ -378,6 +369,15 @@ enum power_state power_handle_state(enum power_state state)
 		break;
 
 	case POWER_G3S5:
+		{
+			int left_ms = DEBUG_MIN_OFF_TIME_MS -
+				(int)((get_time().val - rails_off_time.val) / MSEC);
+
+			if (left_ms > 0) {
+				CPRINTS("holding rails off for %d ms", left_ms);
+				k_msleep(left_ms);
+			}
+		}
 		while (gpu_is_initializing()) {
 			if (task_wait_event(200 * MSEC) == TASK_EVENT_TIMER) {
 				return state;
@@ -461,7 +461,7 @@ enum power_state power_handle_state(enum power_state state)
 
 		/* Call hooks now that rails are up */
 		CPRINTS("hang detect armed");
-		hook_call_deferred(&system_hang_detect_data, HANG_DETECT_DELAY);
+		hook_call_deferred(&system_hang_detect_data, 3 * SECOND);
 
 		/* enable the psys to resume from low power mode */
 #ifdef CONFIG_BOARD_LOTUS
@@ -702,6 +702,7 @@ enum power_state power_handle_state(enum power_state state)
 		k_msleep(5);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_pbtn_out), 0);
 		control_5valw_power(POWER_REQ_POWER_ON, 0);
+		rails_off_time = get_time();
 		k_msleep(5);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_apu_aud_pwr_en), 0);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_pch_pwr_en), 0);
