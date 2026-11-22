@@ -14,7 +14,7 @@
 		gpio_ec_soc_rsmrst_l: ec_soc_rsmrst_l {
 			gpios = <&gpio5 6 (GPIO_OUTPUT_LOW | GPIO_VOLTAGE_1P8)>;
 		};
-		ec_espi_rst_l {
+		gpio_ec_espi_rst_l: ec_espi_rst_l {
 			gpios = <&gpio5 4 (GPIO_INPUT | GPIO_VOLTAGE_1P8)>;
 		};
 		gpio_edp_mux_pwm_sw: edp_mux_pwm_sw {
