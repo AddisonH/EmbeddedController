@@ -264,7 +264,7 @@ void chipset_reset(enum chipset_shutdown_reason reason)
 }
 
 /* DEBUG: minimum time the rails stay off before the next power-on. */
-#define DEBUG_MIN_OFF_TIME_MS 0
+#define DEBUG_MIN_OFF_TIME_MS 500
 static timestamp_t rails_off_time;
 
 static void chipset_force_g3(void)
@@ -405,7 +405,7 @@ enum power_state power_handle_state(enum power_state state)
 		k_msleep(10);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_pbtn_out), 1);
 		/* Let the 0.75 V and 1.8 V ALW rails settle; they have no power good. */
-		k_msleep(470);
+		k_msleep(10);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_ec_soc_rsmrst_l), 1);
 
 		/* Customizes power button out signal without PB task for powering on. */
