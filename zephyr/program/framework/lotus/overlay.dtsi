@@ -4,6 +4,11 @@
  */
 
 / {
+	ec-console {
+		compatible = "ec-console";
+		disabled = "port80";
+	};
+
 	named-gpios {
 		/* Lotus-specific GPIO customizations */
 	};
