@@ -310,9 +310,12 @@ enum power_state power_chipset_init(void)
 #define VW_NO_READY 0
 #define HANG_DETECT_DELAY (5 * SECOND)
 #define HANG_DETECT_MAX_RETRIES 4
+void espi_trace_state(const char *why);
 void system_hang_detect(void)
 {
 	static int retry_count;
+
+	espi_trace_state("hang detect");
 
 	/* The AP was shut down before the check ran. */
 	if (chipset_in_state(CHIPSET_STATE_ANY_OFF))
