@@ -545,8 +545,7 @@ enum power_state power_handle_state(enum power_state state)
 			return POWER_S3;
 		}
 
-		/* DEBUG experiment: was 10 ms */
-		k_msleep(110);
+		k_msleep(10);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_sys_pwrgd_ec), 1);
 
 		lpc_s0ix_resume_restore_masks();
