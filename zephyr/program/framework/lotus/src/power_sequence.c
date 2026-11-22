@@ -457,6 +457,7 @@ enum power_state power_handle_state(enum power_state state)
 	case POWER_S5S3:
 
 		/* Call hooks now that rails are up */
+		CPRINTS("hang detect armed");
 		hook_call_deferred(&system_hang_detect_data, HANG_DETECT_DELAY);
 
 		/* enable the psys to resume from low power mode */
