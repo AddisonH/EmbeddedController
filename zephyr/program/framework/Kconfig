@@ -231,6 +231,13 @@ config PD_ERROR_RECOVERY
 		to send the error recovery command to PD during powering up the
 		system.
 
+config SYSJUMP_RELOAD_RW
+	bool "a jump to RW from RW reloads the image from flash"
+	depends on PLATFORM_EC_EXTERNAL_STORAGE
+	help
+		Lets a newly flashed RW image be started from the running RW
+		image, without resetting to RO first.
+
 # Driver configuration
 config PLATFORM_EC_WAKE_ON_LAN
 	bool "system can be waked on lan"
