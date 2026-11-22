@@ -308,14 +308,31 @@ enum power_state power_chipset_init(void)
  * If EC detect the system hangs, force reset the system then reboot again.
  */
 #define VW_NO_READY 0
+#define HANG_DETECT_DELAY (5 * SECOND)
+#define HANG_DETECT_MAX_RETRIES 4
 void system_hang_detect(void)
 {
-	int virtual_wire_ready = get_espi_virtual_wire_channel_status();
+	static int retry_count;
 
-	if (virtual_wire_ready == VW_NO_READY) {
-		board_reboot_ap_on_g3();
-		chipset_force_shutdown(CHIPSET_RESET_HANG_REBOOT);
+	/* The AP was shut down before the check ran. */
+	if (chipset_in_state(CHIPSET_STATE_ANY_OFF))
+		return;
+
+	if (get_espi_virtual_wire_channel_status() != VW_NO_READY) {
+		retry_count = 0;
+		return;
 	}
+
+	if (retry_count >= HANG_DETECT_MAX_RETRIES) {
+		CPRINTS("eSPI VW not ready, giving up after %d reboots",
+			retry_count);
+		return;
+	}
+
+	CPRINTS("eSPI VW not ready, rebooting AP (%d/%d)", ++retry_count,
+		HANG_DETECT_MAX_RETRIES);
+	board_reboot_ap_on_g3();
+	chipset_force_shutdown(CHIPSET_RESET_HANG_REBOOT);
 }
 DECLARE_DEFERRED(system_hang_detect);
 
@@ -440,7 +457,8 @@ enum power_state power_handle_state(enum power_state state)
 	case POWER_S5S3:
 
 		/* Call hooks now that rails are up */
-		hook_call_deferred(&system_hang_detect_data, 3 * SECOND);
+		CPRINTS("hang detect armed");
+		hook_call_deferred(&system_hang_detect_data, HANG_DETECT_DELAY);
 
 		/* enable the psys to resume from low power mode */
 #ifdef CONFIG_BOARD_LOTUS

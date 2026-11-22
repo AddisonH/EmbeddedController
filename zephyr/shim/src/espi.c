@@ -6,6 +6,7 @@
 #include "acpi.h"
 #include "chipset.h"
 #include "common.h"
+#include "console.h"
 #include "espi.h"
 #include "hooks.h"
 #include "i8042_protocol.h"
@@ -806,6 +807,7 @@ static void custom_espi_channel_ready_handler(const struct device *dev,
 		switch (event.evt_details) {
 		case ESPI_CHANNEL_VWIRE:
 			espi_channel_vr_ready = 1;
+			cprints(CC_CHIPSET, "eSPI VW ready");
 			break;
 		default:
 		}
