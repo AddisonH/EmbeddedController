@@ -380,7 +380,8 @@ enum power_state power_handle_state(enum power_state state)
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_usb_hub_re_en), 1);
 		k_msleep(10);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_pbtn_out), 1);
-		k_msleep(10);
+		/* Let the 0.75 V and 1.8 V ALW rails settle; they have no power good. */
+		k_msleep(110);
 		gpio_pin_set_dt(GPIO_DT_FROM_NODELABEL(gpio_ec_soc_rsmrst_l), 1);
 
 		/* Customizes power button out signal without PB task for powering on. */
