@@ -364,8 +364,10 @@ static void cypd_get_version(int controller)
 		return;
 
 	rv = i2c_read_offset16_block(i2c_port, addr_flags, CCG_READ_ALL_VERSION_REG, data, 24);
-	if (rv != EC_SUCCESS)
+	if (rv != EC_SUCCESS) {
 		CPRINTS("READ_ALL_VERSION_REG failed");
+		return;
+	}
 
 	cypd_print_version(controller, "App1", data+8);
 	cypd_print_version(controller, "App2", data+16);
