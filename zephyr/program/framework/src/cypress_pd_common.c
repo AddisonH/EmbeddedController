@@ -1367,6 +1367,8 @@ void cypd_update_port_state(int controller, int port)
 #endif
 		}
 
+		CPRINTS("DEBUG EPR done p%d active %d", port_idx,
+			get_active_charge_pd_port());
 		clear_erp_progress_mask();
 	}
 #endif
@@ -1604,8 +1606,7 @@ int cypd_cfet_vbus_control(int port, bool enable, bool ec_control)
 
 	rv = cypd_write_reg8_wait_ack(pd_controller, CCG_PORT_VBUS_FET_CONTROL(pd_port),
 		regval);
-	if (rv != EC_SUCCESS)
-		CPRINTS("%s:%d fail:%d", __func__, port, rv);
+	CPRINTS("DEBUG cfet p%d reg 0x%x rv %d", port, regval, rv);
 
 	if (enable)
 		pd_c_fet_active_port |= BIT(port);
@@ -2105,6 +2106,7 @@ void cypd_port_int(int controller, int port)
 		if (snk_transition_flags) {
 			if (IS_ENABLED(CONFIG_PLATFORM_EC_CHARGE_MANAGER))
 				charge_manager_force_ceil(port_idx, 500);
+			CPRINTS("DEBUG force ceil p%d", port_idx);
 			snk_transition_flags = 0;
 		}
 		break;
@@ -2625,6 +2627,7 @@ void perform_error_recovery(int controller)
 #endif
 		data[0] = port;
 		cypd_write_reg_block(controller, CCG_DPM_CMD_REG, data, 2);
+		CPRINTS("DEBUG error recovery C%d P%d", controller, port);
 	}
 }
 

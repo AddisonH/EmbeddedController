@@ -481,7 +481,8 @@ static void epr_flow_pending_deferred(void)
 				pd_port_states[port_idx].epr_support = 0;
 				pd_port_states[port_idx].epr_status = EPR_DISABLED;
 				pd_epr_in_progress &= EPR_PROCESS_MASK;
-				CPRINTS("C%d EPR stop retry, give up", port_idx);
+				CPRINTS("C%d EPR stop retry, give up, charge port %d",
+					port_idx, charge_port);
 				if (charge_port != -1) {
 					int controller = PORT_TO_CONTROLLER(charge_port);
 					int port = PORT_TO_CONTROLLER_PORT(charge_port);
