@@ -419,8 +419,9 @@ int board_discharge_on_ac(int enable)
 	int chgnum;
 	int rv = EC_SUCCESS;
 
+	if (bypass_force_disable != enable)
+		CPRINTS("DEBUG discharge on AC %d", enable);
 	bypass_force_disable = enable;
-	CPRINTS("DEBUG discharge on AC %d", enable);
 	/*
 	 * When discharge on AC is selected, cycle through all chargers to
 	 * enable or disable this feature.
